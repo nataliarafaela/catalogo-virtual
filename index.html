@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vitrine Digital - Loja</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Seu CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-gray-100">
+
+<header class="header">
+
+  <div class="header-content">
+
+    <!-- LOGO -->
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="Logo da Loja" class="logo">
+      <span class="nome-loja">Catalógo Digital Sofia Calçados</span>
+    </div>
+
+    <!-- BOTÃO WHATSAPP -->
+    <a href="https://wa.me/5581999999999" target="_blank" class="botao-header">
+      WhatsApp
+    </a>
+
+  </div>
+
+</header>
+
+
+
+<section class="filtros">
+  <select id="filtroCategoria">
+    <option value="">Categoria</option>
+    <option value="sandalia">Sandália</option>
+    <option value="tenis">Tênis</option>
+    <option value="salto">Salto</option>
+    <option value="infantil">Infantil</option>
+  </select>
+
+  <select id="filtroTamanho">
+    <option value="">Tamanho</option>
+    <option>27</option>
+    <option>28</option>
+    <option>29</option>
+    <option>30</option>
+    <option>32</option>
+    <option>33</option>
+    <option>34</option>
+    <option>35</option>
+    <option>36</option>
+    <option>37</option>
+    <option>38</option>
+    <option>39</option>
+    <option>40</option>
+    <option>41</option>
+    <option>42</option>
+  </select>
+</section>
+
+<main id="listaProdutos" class="grid grid-cols-2 md:grid-cols-3 gap-6 p-6"></main>
+
+<script src="script.js"></script>
+</body>
+</html>
