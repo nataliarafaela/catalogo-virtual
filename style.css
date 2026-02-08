@@ -222,17 +222,40 @@ h1, .titulo-catalogo {
 
 #backToTop {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: black;
-  color: white;
-  border: none;
-  padding: 12px 14px;
+  bottom: 22px;
+  right: 22px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
+  background: #111;
+  color: #fff;
+  border: none;
   cursor: pointer;
-  display: none;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all 0.3s ease;
   z-index: 999;
 }
+
+/* quando aparece */
+#backToTop.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* efeito suave */
+#backToTop:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+
+
 
 
 
