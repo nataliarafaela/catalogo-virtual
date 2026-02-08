@@ -224,14 +224,16 @@ h1, .titulo-catalogo {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: #000;
-  color: #fff;
+  background: black;
+  color: white;
   border: none;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-radius: 50%;
   cursor: pointer;
   display: none;
-  font-size: 16px;
+  z-index: 999;
 }
+
+
 
 
