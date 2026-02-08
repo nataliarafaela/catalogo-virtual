@@ -192,11 +192,19 @@ Tamanho: ${tamanho}`;
 const backToTop = document.getElementById("backToTop");
 
 window.addEventListener("scroll", () => {
-  backToTop.style.display = window.scrollY > 300 ? "block" : "none";
+  if (window.scrollY > 300) {
+    backToTop.classList.add("show");
+  } else {
+    backToTop.classList.remove("show");
+  }
 });
 
 backToTop.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 });
+
 
 
