@@ -172,9 +172,12 @@ h1, .titulo-catalogo {
 }
 
 .nome-loja{
+  font-family: 'Playfair Display', serif;
   font-weight:600;
-  font-size:18px;
+  font-size:20px;
+  letter-spacing:1px;
 }
+
 
 /* BOTÃO HEADER */
 
@@ -254,6 +257,7 @@ h1, .titulo-catalogo {
 #backToTop:hover {
   transform: translateY(-3px) scale(1.05);
 }
+
 
 
 
