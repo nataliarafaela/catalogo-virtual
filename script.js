@@ -151,20 +151,36 @@ function renderizar(listaFiltrada){
 // ⚡ LÓGICA DE SELEÇÃO DINÂMICA
 // =====================================
 function selecionarCor(id, el, cor) {
-    // 1. UI: Ativa o botão da cor selecionada
-    el.parentElement.querySelectorAll(".tag-tamanho").forEach(t => t.classList.remove("ativo"));
+    // --- NOVO: LÓGICA DE RESET GLOBAL ---
+    
+    // 1. Limpa o estado global (deixa apenas o produto atual selecionado)
+    selecionado = {}; 
+    
+    // 2. Remove a classe 'ativo' de TODOS os botões de cor e tamanho do catálogo inteiro
+    document.querySelectorAll(".tag-tamanho").forEach(t => t.classList.remove("ativo"));
+
+    // 3. Reseta o texto de tamanhos de todos os outros cards que não são este
+    document.querySelectorAll(".tamanhos[id^='tamanhos-opcoes-']").forEach(container => {
+        if (container.id !== `tamanhos-opcoes-${id}`) {
+            container.innerHTML = '<span class="placeholder-tamanho">Escolha uma cor...</span>';
+        }
+    });
+
+    // --- FIM DO RESET ---
+
+    // 4. UI: Ativa o botão da cor selecionada (neste card específico)
     el.classList.add("ativo");
 
-    // 2. Estado: Salva a cor e reseta tamanho anterior
+    // 5. Estado: Salva a cor e o ID do produto atual
     selecionado[id] = { cor: cor };
 
-    // 3. Filtro: Busca variantes desta cor com estoque
+    // 6. Filtro: Busca variantes desta cor com estoque
     const produto = produtos.find(p => p.id === id);
     const tamanhosFiltrados = produto.variantes.filter(v => 
         v.cor.toLowerCase() === cor.toLowerCase() && v.estoque > 0
     ).sort((a, b) => a.tamanho - b.tamanho);
 
-    // 4. DOM: Atualiza os botões de tamanho apenas deste card
+    // 7. DOM: Atualiza os botões de tamanho deste card
     const containerTamanhos = document.getElementById(`tamanhos-opcoes-${id}`);
     containerTamanhos.innerHTML = tamanhosFiltrados.map(v => `
         <span class="tag-tamanho" onclick="selecionarTamanho('${id}', this, '${v.tamanho}')">
