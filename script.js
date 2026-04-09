@@ -1,210 +1,228 @@
+// =====================================
+// 📦 ESTADO GLOBAL
+// =====================================
 let produtos = [];
-let tamanhoSelecionado = {};
+let variantes = [];
+let selecionado = {}; 
 
-const urlPlanilha =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vROQzyqceWg7roZJAHbweyrRp0kNt-gImtd9VJsAyhIDPzzrhmseCiNcq8lRrw6CiKU8ynX88gKWDod/pub?output=csv";
+const urlProdutos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQtesIfp9vMTQldlv6-EMbUcxbacxS1Bfeu63tsu03H-3pPXA4hKiiZcOzLxy5A1-ruv6pCIJdN_vGm/pub?gid=0&single=true&output=csv";
+const urlVariantes = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQtesIfp9vMTQldlv6-EMbUcxbacxS1Bfeu63tsu03H-3pPXA4hKiiZcOzLxy5A1-ruv6pCIJdN_vGm/pub?gid=1085531239&single=true&output=csv";
 
 const lista = document.getElementById("listaProdutos");
 const filtroCategoria = document.getElementById("filtroCategoria");
 const filtroTamanho = document.getElementById("filtroTamanho");
 
+filtroCategoria.addEventListener("change", filtrarProdutos);
+filtroTamanho.addEventListener("change", filtrarProdutos);
+
+const meuAppName = "Admin-719054069"; 
+const minhaTabela = "Produtos";
+
+function formatarLinkAppSheet(path) {
+  if (!path) return null;
+  path = path.trim().replace(/^"|"$/g, "").trim();
+  if (!path) return null;
+  if (path.startsWith('data:image') || path.startsWith('http')) return path;
+  return `https://www.appsheet.com/template/gettablefileurl?appName=${encodeURIComponent(meuAppName)}&tableName=${encodeURIComponent(minhaTabela)}&fileName=${encodeURIComponent(path)}`;
+}
 
 // =====================================
-// 🧠 PARSER CSV PROFISSIONAL
+// 🧠 PARSERS (CSV)
 // =====================================
-function parseCSVLine(linha){
-
+function parseProduto(linha){
   if(!linha) return null;
-
-  const colunas = linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-
-  if(!colunas || colunas.length < 5) return null;
+  const col = linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+  if(!col || col.length < 5) return null;
 
   return {
-    nome: (colunas[0] || "").replace(/^"|"$/g,"").trim(),
-    categoria: (colunas[1] || "").trim(),
-
-    preco: parseFloat(
-      (colunas[2] || "")
-      .replace(/[^0-9,.-]/g,"")
-      .replace(",",".")
-    ) || 0,
-
-    tamanhos: (colunas[3] || "")
-      .split("|")
-      .map(t => Number(t.replace(",",".").trim()))
-      .filter(t => !isNaN(t)),
-
-    imagem: (colunas[4] || "").replace(/^"|"$/g,"").trim()
+    id: (col[0]||"").trim().replace(/^"|"$/g,""),
+    nome: (col[1]||"").replace(/^"|"$/g,"").trim(),
+    categoria: (col[2]||"").replace(/^"|"$/g,"").trim(),
+    preco: parseFloat((col[3]||"").replace(",", ".")) || 0,
+    imagem: formatarLinkAppSheet(col[4]),
+    imagens_extra: (col[5]||"").trim()
   };
 }
 
-
-// =====================================
-// ⏳ LOADING SKELETON
-// =====================================
-function mostrarLoading(){
-
-  lista.innerHTML = "";
-
-  for(let i=0;i<6;i++){
-    lista.innerHTML += `
-      <div class="card loading">
-        <div class="img-loading"></div>
-        <div class="linha-loading"></div>
-        <div class="linha-loading pequena"></div>
-      </div>
-    `;
-  }
+function parseVariante(linha){
+  if(!linha) return null;
+  const col = linha.split(",");
+  if(col.length < 5) return null;
+  return {
+    id_variante: col[0].trim(),
+    id_produto: col[1].trim().replace(/^"|"$/g,""),
+    tamanho: (col[2]||"").trim(),
+    cor: (col[3]||"").trim(),
+    estoque: Number(col[4]) || 0
+  };
 }
 
-
 // =====================================
-// 🔄 BUSCAR PLANILHA
+// 🔄 CARREGAR DADOS
 // =====================================
-mostrarLoading();
+Promise.all([
+  fetch(urlProdutos).then(r=>r.text()),
+  fetch(urlVariantes).then(r=>r.text())
+]).then(([csvProdutos,csvVariantes])=>{
+  produtos = csvProdutos.split("\n").slice(1).map(parseProduto).filter(p=>p && p.id);
+  variantes = csvVariantes.split("\n").slice(1).map(parseVariante).filter(v=>v && v.id_produto);
 
-fetch(urlPlanilha)
-  .then(res => res.text())
-  .then(texto => {
-
-    const linhas = texto.split("\n").slice(1);
-
-    produtos = linhas
-      .map(parseCSVLine)
-      .filter(p => p && p.nome);
-
-    // ⭐ ordenação automática por preço
-    produtos.sort((a,b)=> a.preco - b.preco);
-
-    renderizar(produtos);
-  })
-  .catch(err => {
-    console.error("Erro ao carregar:", err);
+  produtos.forEach(p=>{
+    p.variantes = variantes.filter(v=>v.id_produto === p.id);
+    p.temEstoque = p.variantes.reduce((s,v)=>s+v.estoque,0) > 0;
   });
 
+  produtos = produtos.filter(p=>p.temEstoque).sort((a,b)=> a.preco - b.preco);
+  renderizar(produtos);
+});
 
 // =====================================
-// 🎨 RENDERIZAR PRODUTOS
+// 🔍 LÓGICA DE FILTRO SUPERIOR
+// =====================================
+
+  
+function filtrarProdutos() {
+  // Função auxiliar para remover acentos e espaços
+  const normalizar = (texto) => 
+    texto.normalize("NFD")
+         .replace(/[\u0300-\u036f]/g, "")
+         .toLowerCase()
+         .trim();
+
+  const catSelecionada = normalizar(filtroCategoria.value);
+  const tamSelecionado = filtroTamanho.value;
+
+  const produtosFiltrados = produtos.filter(p => {
+    const categoriaProduto = normalizar(p.categoria || "");
+    
+    const bateCategoria = catSelecionada === "" || 
+                          categoriaProduto.includes(catSelecionada);
+
+    const bateTamanho = tamSelecionado === "" || 
+                        p.variantes.some(v => v.tamanho == tamSelecionado && v.estoque > 0);
+
+    return bateCategoria && bateTamanho;
+  });
+
+  renderizar(produtosFiltrados);
+}
+
+// =====================================
+// 🖌️ RENDERIZAÇÃO
 // =====================================
 function renderizar(listaFiltrada){
-
   lista.innerHTML = "";
-
-  listaFiltrada.forEach((p,index)=>{
-
-    lista.innerHTML += `
-      <div class="card">
-        <img 
-          src="${p.imagem}" 
-          alt="${p.nome}"
-          onerror="this.src='https://via.placeholder.com/300x300?text=Sem+Imagem'"
-        >
-
-        <h2>${p.nome}</h2>
-
-        <p class="preco">
-          R$ ${p.preco.toFixed(2).replace(".",",")}
-        </p>
-
-        <div class="tamanhos">
-          ${p.tamanhos.map(t=>`
-            <span 
-              class="tag-tamanho"
-              onclick="selecionarTamanho(${index},this,${t})">
-              ${t}
-            </span>
-          `).join("")}
-        </div>
-
-        <button class="botao-whats" onclick="enviarWhats(${index})">
-          Comprar pelo WhatsApp
-        </button>
-      </div>
-    `;
-  });
-}
-
-
-// =====================================
-// 👟 TAMANHO
-// =====================================
-function selecionarTamanho(index,elemento,tamanho){
-
-  const tags = elemento.parentElement.querySelectorAll(".tag-tamanho");
-  tags.forEach(tag=>tag.classList.remove("ativo"));
-
-  elemento.classList.add("ativo");
-  tamanhoSelecionado[index] = tamanho;
-}
-
-
-// =====================================
-// 🔎 FILTROS
-// =====================================
-function aplicarFiltros(){
-
-  const cat = filtroCategoria.value;
-  const tam = filtroTamanho.value;
-
-  const filtrado = produtos.filter(p=>{
-
-    const okCat = cat === "" || p.categoria === cat;
-
-    const okTam =
-      tam === "" ||
-      p.tamanhos.includes(Number(tam));
-
-    return okCat && okTam;
-  });
-
-  renderizar(filtrado);
-}
-
-filtroCategoria.addEventListener("change", aplicarFiltros);
-filtroTamanho.addEventListener("change", aplicarFiltros);
-
-
-// =====================================
-// 📲 WHATSAPP
-// =====================================
-function enviarWhats(index){
-
-  const produto = produtos[index];
-  const tamanho = tamanhoSelecionado[index];
-
-  if(!tamanho){
-    alert("Selecione um tamanho antes 🙂");
+  if(listaFiltrada.length === 0) {
+    lista.innerHTML = "<p class='col-span-full text-center py-10 text-gray-500'>Nenhum produto encontrado.</p>";
     return;
   }
 
-  const numero = "558189928688";
+  listaFiltrada.forEach((p)=>{
+    // Pegamos apenas cores que possuem pelo menos um tamanho com estoque > 0
+    const coresDisponiveis = [...new Set(p.variantes.filter(v=>v.estoque > 0).map(v=>v.cor))];
 
-  const msg =
-`Olá! Quero comprar:
-Produto: ${produto.nome}
-Tamanho: ${tamanho}`;
-
-  window.open(
-    `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`
-  );
-}
-const backToTop = document.getElementById("backToTop");
-
-window.addEventListener("scroll", () => {
-  if (window.scrollY > 300) {
-    backToTop.classList.add("show");
-  } else {
-    backToTop.classList.remove("show");
-  }
-});
-
-backToTop.addEventListener("click", () => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
+    lista.innerHTML += `
+      <div class="card">
+        <img src="${p.imagem}" onclick="abrirModal('${p.id}')" style="cursor:pointer">
+        <h2>${p.nome}</h2>
+        <p class="preco">R$ ${p.preco.toFixed(2).replace(".",",")}</p>
+        
+        <div class="secao-selecao">
+          <small>Selecione a Cor:</small>
+          <div class="tamanhos">
+            ${coresDisponiveis.map(c=>`<span class="tag-tamanho" onclick="selecionarCor('${p.id}',this,'${c}')">${capitalizar(c)}</span>`).join("")}
+          </div>
+        </div>
+        
+        <div class="secao-selecao">
+          <small>Tamanhos disponíveis:</small>
+          <div class="tamanhos" id="tamanhos-opcoes-${p.id}">
+            <span class="placeholder-tamanho">Escolha uma cor...</span>
+          </div>
+        </div>
+        
+        <button class="botao-whats" onclick="enviarWhats('${p.id}')">Comprar pelo WhatsApp</button>
+      </div>
+    `;
   });
-});
+}
 
+// =====================================
+// ⚡ LÓGICA DE SELEÇÃO DINÂMICA
+// =====================================
+function selecionarCor(id, el, cor) {
+    // 1. UI: Ativa o botão da cor selecionada
+    el.parentElement.querySelectorAll(".tag-tamanho").forEach(t => t.classList.remove("ativo"));
+    el.classList.add("ativo");
 
+    // 2. Estado: Salva a cor e reseta tamanho anterior
+    selecionado[id] = { cor: cor };
 
+    // 3. Filtro: Busca variantes desta cor com estoque
+    const produto = produtos.find(p => p.id === id);
+    const tamanhosFiltrados = produto.variantes.filter(v => 
+        v.cor.toLowerCase() === cor.toLowerCase() && v.estoque > 0
+    ).sort((a, b) => a.tamanho - b.tamanho);
+
+    // 4. DOM: Atualiza os botões de tamanho apenas deste card
+    const containerTamanhos = document.getElementById(`tamanhos-opcoes-${id}`);
+    containerTamanhos.innerHTML = tamanhosFiltrados.map(v => `
+        <span class="tag-tamanho" onclick="selecionarTamanho('${id}', this, '${v.tamanho}')">
+            ${v.tamanho}
+        </span>
+    `).join("");
+}
+
+function selecionarTamanho(id, el, tam){ 
+  el.parentElement.querySelectorAll(".tag-tamanho").forEach(x=>x.classList.remove("ativo"));
+  el.classList.add("ativo"); 
+  selecionado[id].tamanho = tam; 
+}
+
+// =====================================
+// 🖼️ MODAL E WHATSAPP
+// =====================================
+function abrirModal(idProduto){
+  const produto = produtos.find(p => p.id === idProduto);
+  if(!produto) return;
+
+  const modal = document.getElementById("modalProduto");
+  const imgPrincipal = document.getElementById("modalImagemPrincipal");
+  const miniaturas = document.getElementById("modalMiniaturas");
+
+  document.getElementById("modalNome").innerText = produto.nome;
+  document.getElementById("modalPreco").innerText = "R$ " + produto.preco.toFixed(2).replace(".",",");
+
+  let imagens = [];
+  if(produto.imagem) imagens.push(produto.imagem);
+
+  if(produto.imagens_extra){
+    const extras = produto.imagens_extra.replace(/^"|"$/g, "").split("|").map(i=>i.trim()).filter(i=>i);
+    extras.forEach(img => imagens.push(formatarLinkAppSheet(img)));
+  }
+
+  imgPrincipal.src = imagens[0];
+  miniaturas.innerHTML = imagens.map(img => `
+    <img src="${img}" onclick="trocarImagem('${img}')" class="mini">
+  `).join("");
+
+  modal.classList.replace("hidden", "flex");
+}
+
+function trocarImagem(src){ document.getElementById("modalImagemPrincipal").src = src; }
+function fecharModal(){ document.getElementById("modalProduto").classList.replace("flex", "hidden"); }
+
+function enviarWhats(id){
+  const p = produtos.find(prod => prod.id === id);
+  const sel = selecionado[id];
+  
+  if(!sel || !sel.cor || !sel.tamanho){ 
+    alert("Por favor, selecione primeiro a Cor e depois o Tamanho! 😊"); 
+    return; 
+  }
+  
+  const msg = `Olá! Vi no catálogo e gostaria de comprar:\n\n*Produto:* ${p.nome}\n*Cor:* ${capitalizar(sel.cor)}\n*Tamanho:* ${sel.tamanho}\n*Preço:* R$ ${p.preco.toFixed(2).replace(".",",")}`;
+  window.open(`https://wa.me/558189928688?text=${encodeURIComponent(msg)}`);
+}
+
+function capitalizar(t){ return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : ""; }
