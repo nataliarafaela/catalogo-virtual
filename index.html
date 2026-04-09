@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vitrine Digital - Loja</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-
-
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -29,7 +26,7 @@
     </div>
 
     <!-- BOTÃO WHATSAPP -->
-    <a href="https://wa.me/558189928688" target="_blank" class="botao-header">
+    <a href="https://wa.me/5581999999999" target="_blank" class="botao-header">
       WhatsApp
     </a>
 
@@ -41,19 +38,21 @@
 
 <section class="filtros">
   <select id="filtroCategoria">
-    <option value="">Categoria</option>
-    <option value="sandalia">Sandália</option>
-    <option value="tenis">Tênis</option>
-    <option value="salto">Salto</option>
-    <option value="infantil">Infantil</option>
-  </select>
+  <option value="">Todas</option>
+  <option value="Sandália">Sandálias</option>
+  <option value="Tênis">Tênis</option>
+  <option value="Infantil ">Infantil</option>
+</select>
 
   <select id="filtroTamanho">
     <option value="">Tamanho</option>
+    <option>25</option>
+    <option>26</option>
     <option>27</option>
     <option>28</option>
     <option>29</option>
     <option>30</option>
+    <option>31</option>
     <option>32</option>
     <option>33</option>
     <option>34</option>
@@ -65,18 +64,59 @@
     <option>40</option>
     <option>41</option>
     <option>42</option>
+    <option>43</option>
+    <option>44</option>
   </select>
 </section>
 
 <main id="listaProdutos" class="grid grid-cols-2 md:grid-cols-3 gap-6 p-6"></main>
-<button id="backToTop">↑</button>
-<script src="script.js"></script>
 
+<script src="script.js"></script>
+<!-- ================= MODAL PRODUTO ================= -->
+<div id="modalProduto" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+
+  <div class="bg-white rounded-2xl p-4 max-w-lg w-full relative">
+
+    <button onclick="fecharModal()" class="absolute top-2 right-3 text-xl">✕</button>
+
+    <img id="modalImagemPrincipal" class="w-full rounded-xl mb-3 cursor-zoom-in">
+
+    <div id="modalMiniaturas" class="flex gap-2 overflow-x-auto"></div>
+    <div id="modalCores" class="flex gap-2 flex-wrap mt-3"></div>
+    <div id="modalTamanhos" class="flex gap-2 flex-wrap mt-3"></div>
+
+
+    <h2 id="modalNome" class="font-semibold mt-3"></h2>
+    <p id="modalPreco" class="text-gray-600"></p>
+
+  </div>
+  
+
+
+</div>
 
 </body>
+<footer class="footer">
+
+  <div class="footer-content">
+
+    <div class="footer-info">
+      <strong>Sofia Calçados</strong><br>
+      Catálogo Digital<br>
+      Av. Caruaru, 166 - box 105 - Boa Vista 2, Caruaru - PE, 55038-370
+    </div>
+
+    <div class="footer-contato">
+      <a href="https://wa.me/558189928688" target="_blank">WhatsApp</a>
+      <a href="https://www.instagram.com/sofiacalcadoss/" target="_blank">Instagram</a>
+    </div>
+
+  </div>
+
+  <p class="footer-copy">
+    © 2026 Sofia Calçados - Todos os direitos reservados
+  </p>
+
+</footer>
+
 </html>
-
-
-
-
-
