@@ -1,570 +1,273 @@
- body {
-
-  font-family: 'Poppins', sans-serif;
-
-  background-color: #f9f9f9;
-
-  color: #222;
-
+/* ================= CONFIGURAÇÕES GERAIS ================= */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    color: #222;
+    margin: 0;
 }
-
-
 
 h1, .titulo-catalogo {
-
-  font-family: 'Playfair Display', serif;
-
-  letter-spacing: 1px;
-
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 1px;
 }
 
-/* HEADER */
-
+/* ================= HEADER ================= */
 .header {
-
-  background: white;
-
-  padding: 20px;
-
-  text-align: center;
-
-  font-size: 22px;
-
-  font-weight: bold;
-
-  box-shadow: 0px 2px 10px rgba(0,0,0,0.08);
-
+    background: #ff07c0;
+    box-shadow: 0px 4px 20px rgba(0,0,0,0.06);
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    color: white;
 }
 
+.header-content {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
+.logo {
+    width: 60px;
+    height: auto;
+    object-fit: contain;
+}
 
+.nome-loja {
+    font-weight: 600;
+    font-size: 18px;
+}
 
-/* FILTROS */
+.botao-header {
+    background: #1ebe5d;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
 
+/* ================= FILTROS ================= */
 .filtros {
-
-  display: flex;
-
-  justify-content: center;
-
-  gap: 10px;
-
-  padding: 20px;
-
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
 }
-
-
 
 .filtros select {
-
-  padding: 10px;
-
-  border-radius: 10px;
-
-  border: 1px solid #ddd;
-
-  background: white;
-
-  cursor: pointer;
-
-  transition: 0.2s;
-
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
 }
 
-
-
-.filtros select:hover {
-
-  border-color: black;
-
-}
-
-
-
-/* CARD PRODUTO */
-
+/* ================= CARDS DE PRODUTO ================= */
 .card {
-
-  background: white;
-
-  border-radius: 20px;
-
-  padding: 12px;
-
-  box-shadow: 0px 4px 15px rgba(0,0,0,0.08);
-
-  transition: 0.25s ease;
-
-
-
-  display:flex;
-
-  flex-direction:column;
-
-  height:100%; /* 👈 segredo principal */
-
+    background: white;
+    border-radius: 20px;
+    padding: 12px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.08);
+    transition: 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
-
-
-
-
-
-
-
-
 
 .card:hover {
-
-  transform: translateY(-5px);
-
-  box-shadow: 0px 8px 20px rgba(0,0,0,0.12);
-
+    transform: translateY(-5px);
 }
-
-
 
 .card img {
-
-  width: 100%;
-  aspect-ratio: 1/1;
-  object-fit: contain;
-  background-color: #ffffff;
-
-  border-radius: 12px;
-
-  margin-bottom: 10px;
-  display:block
-  
-
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: contain;
+    background-color: #ffffff;
+    border-radius: 12px;
+    margin-bottom: 10px;
 }
-
-
 
 .card h2 {
-
-  font-weight: 600;
-  font-size: 16px;
-
-  margin-bottom: 5px;
-  min-height: 40px;
-  display: flex;
-  align-items:center;
-
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 5px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
 }
-
-
 
 .preco {
-
-  color: #555;
-
-  font-size: 14px;
-
+    color: #ff07c0;
+    font-weight: bold;
+    font-size: 15px;
 }
 
+/* Botão Ver (Aparece apenas no celular via JS/Media Query) */
+.btn-ver-mobile {
+    display: none; /* Escondido por padrão */
+    background: #ff07c0;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-top: 10px;
+    font-weight: 500;
+    text-decoration: none;
+}
 
+/* ================= SELEÇÕES (CORES E TAMANHOS) ================= */
+.tamanhos {
+    margin-top: 8px;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
 
-/* BOTÃO WHATSAPP */
+.tag-tamanho {
+    background: #f1f1f1;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    border: 1px solid transparent;
+}
 
+.tag-tamanho:hover {
+    background: #ddd;
+}
+
+.tag-tamanho.ativo {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.placeholder-tamanho {
+    font-size: 12px;
+    color: #999;
+    font-style: italic;
+}
+
+/* ================= BOTÃO WHATSAPP CARD ================= */
 .botao-whats {
-
-  margin-top:12px; /* 👈 cria espaço fixo acima do botão */
-
-  width:100%;
-
-  background:#25D366;
-
-  color:white;
-
-  padding:10px;
-
-  border-radius:12px;
-
-  border:none;
-
-  cursor:pointer;
-
-  transition:0.2s;
-
+    margin-top: auto;
+    width: 100%;
+    background: #25D366;
+    color: white;
+    padding: 10px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 15px;
 }
 
-
-
-
-
-.botao-whats:hover {
-
-  background: #1ebe5d;
-
+/* ================= MODAL ESTRUTURA ================= */
+#modalProduto {
+    padding: 15px;
 }
 
-.tamanhos{
-
-  margin-top:8px;
-
-  display:flex;
-
-  gap:5px;
-
-  flex-wrap:wrap;
-
+.modal-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
 }
 
-
-
-.tag-tamanho{
-
-  background:#f1f1f1;
-
-  padding:6px 10px;
-
-  border-radius:10px;
-
-  font-size:12px;
-
-  cursor:pointer;
-
-  transition:0.2s;
-
+/* Ajuste para Desktop (Lado a Lado) */
+@media (min-width: 768px) {
+    .modal-container {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    .modal-col-esquerda {
+        flex: 1.2; /* Imagem um pouco maior */
+    }
+    .modal-col-direita {
+        flex: 1;
+    }
 }
 
-
-
-.tag-tamanho:hover{
-
-  background:#ddd;
-
+#modalImagemPrincipal {
+    width: 100%;
+    border-radius: 15px;
+    object-fit: contain;
+    background: #f9f9f9;
 }
 
-
-
-.tag-tamanho.ativo{
-
-  background:black;
-
-  color:white;
-
+#modalMiniaturas img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
 }
 
-
-
-/* LOGO HEADER */
-
-
-
-.logo-container{
-
-  display:flex;
-
-  justify-content:center;
-
-  align-items:center;
-
+#modalMiniaturas img:hover {
+    border-color: #ff07c0;
 }
 
+/* ================= RESPONSIVIDADE (CELULAR) ================= */
+@media (max-width: 767px) {
+    /* Esconde seleções complexas no card para não poluir */
+    .card .secao-selecao, 
+    .card .botao-whats {
+        display: none !important;
+    }
 
+    /* Mostra o botão ver no celular */
+    .btn-ver-mobile {
+        display: block;
+    }
 
-.logo{
+    /* Ajusta grid de produtos */
+    #listaProdutos {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+        padding: 12px !important;
+    }
 
-  width:120px;   /* controla o tamanho visual */
-
-  height:auto;   /* mantém proporção */
-
-  object-fit:contain;
-
+    .card h2 {
+        font-size: 14px;
+        min-height: 35px;
+    }
 }
 
-
-
-/* ===== HEADER PROFISSIONAL ===== */
-
-
-
-.header{
-
-  background:#ff07c0;
-
-  box-shadow:0px 4px 20px rgba(0,0,0,0.06);
-
-  padding:10px 20px;
-
-  position:sticky;
-
-  top:0;
-
-  z-index:10;
-
-  color: white;
-
- 
-
+/* ================= FOOTER ================= */
+.footer {
+    background: #ff07c0;
+    color: white;
+    margin-top: 40px;
+    padding: 30px 20px 15px;
 }
 
-
-
-.header-content{
-
-  max-width:1100px;
-
-  margin:auto;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
+.footer-content {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
-
-
-/* LOGO */
-
-
-
-.logo-container{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:10px;
-
-}
-
-
-
-.logo{
-
-  width:60px;
-
-  height:auto;
-
-  object-fit:contain;
-
-}
-
-
-
-.nome-loja{
-
-  font-weight:600;
-
-  font-size:18px;
-
-}
-
-
-
-/* BOTÃO HEADER */
-
-
-
-.botao-header{
-
-  background:#1ebe5d;
-
-  color:white;
-
-  padding:8px 16px;
-
-  border-radius:12px;
-
-  text-decoration:none;
-
-  font-size:14px;
-
-  transition:0.2s;
-
-}
-
-
-
-.botao-header:hover{
-
-  background:#333;
-
-}
-
-
-
-.loading{
-
-  animation: pulse 1.2s infinite;
-
-}
-
-
-
-.img-loading{
-
-  width:100%;
-
-  height:200px;
-
-  background:#eee;
-
-  border-radius:8px;
-
-}
-
-
-
-.linha-loading{
-
-  height:15px;
-
-  background:#eee;
-
-  margin-top:10px;
-
-  border-radius:4px;
-
-}
-
-
-
-.pequena{
-
-  width:60%;
-
-}
-
-
-
-@keyframes pulse{
-
-  0%{opacity:.6;}
-
-  50%{opacity:1;}
-
-  100%{opacity:.6;}
-
-}
-
-/* ===== FOOTER ===== */
-
-
-
-.footer{
-
-  background:#ff07c0;
-
-  color:white;
-
-  margin-top:40px;
-
-  padding:30px 20px 15px;
-
-}
-
-
-
-.footer-content{
-
-  max-width:1100px;
-
-  margin:auto;
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:flex-start;
-
-  flex-wrap:wrap;
-
-  gap:20px;
-
-}
-
-
-
-.footer-info{
-
-  font-size:14px;
-
-  line-height:1.6;
-
-}
-
-
-
-.footer-contato a{
-
-  display:block;
-
-  color:white;
-
-  text-decoration:none;
-
-  font-size:14px;
-
-  margin-bottom:6px;
-
-  transition:0.2s;
-
-}
-
-
-
-.footer-contato a:hover{
-
-  opacity:0.7;
-
-}
-
-
-
-.footer-copy{
-
-  text-align:center;
-
-  font-size:12px;
-
-  margin-top:20px;
-
-  opacity:0.8;
-
-}
-
-#modalMiniaturas img{
-
-  width:60px;
-
-  height:60px;
-
-  object-fit:cover;
-
-  border-radius:8px;
-
-  cursor:pointer;
-
-  border:2px solid transparent;
-
-}
-
-
-
-#modalMiniaturas img:hover{
-
-  border-color:black;
-
-}
-
-.badge-ultimas{
-
-  background:#ff07c0;
-
-  color:white;
-
-  font-size:10px;
-
-  padding:2px 6px;
-
-  border-radius:8px;
-
-  margin-left:4px;
-
+.footer-copy {
+    text-align: center;
+    font-size: 12px;
+    margin-top: 20px;
+    opacity: 0.8;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 15px;
 }
