@@ -76,34 +76,17 @@ Promise.all([
   renderizar(produtos);
 });
 
-// =====================================
-// 🔍 LÓGICA DE FILTRO SUPERIOR
-// =====================================
-
-  
 function filtrarProdutos() {
-  // Função auxiliar para remover acentos e espaços
-  const normalizar = (texto) => 
-    texto.normalize("NFD")
-         .replace(/[\u0300-\u036f]/g, "")
-         .toLowerCase()
-         .trim();
-
+  const normalizar = (texto) => texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
   const catSelecionada = normalizar(filtroCategoria.value);
   const tamSelecionado = filtroTamanho.value;
 
   const produtosFiltrados = produtos.filter(p => {
     const categoriaProduto = normalizar(p.categoria || "");
-    
-    const bateCategoria = catSelecionada === "" || 
-                          categoriaProduto.includes(catSelecionada);
-
-    const bateTamanho = tamSelecionado === "" || 
-                        p.variantes.some(v => v.tamanho == tamSelecionado && v.estoque > 0);
-
+    const bateCategoria = catSelecionada === "" || categoriaProduto.includes(catSelecionada);
+    const bateTamanho = tamSelecionado === "" || p.variantes.some(v => v.tamanho == tamSelecionado && v.estoque > 0);
     return bateCategoria && bateTamanho;
   });
-
   renderizar(produtosFiltrados);
 }
 
@@ -118,7 +101,6 @@ function renderizar(listaFiltrada){
   }
 
   listaFiltrada.forEach((p)=>{
-    // Pegamos apenas cores que possuem pelo menos um tamanho com estoque > 0
     const coresDisponiveis = [...new Set(p.variantes.filter(v=>v.estoque > 0).map(v=>v.cor))];
 
     lista.innerHTML += `
@@ -127,6 +109,8 @@ function renderizar(listaFiltrada){
         <h2>${p.nome}</h2>
         <p class="preco">R$ ${p.preco.toFixed(2).replace(".",",")}</p>
         
+        <a href="javascript:void(0)" class="btn-ver-mobile" onclick="abrirModal('${p.id}')">Ver detalhes</a>
+
         <div class="secao-selecao">
           <small>Selecione a Cor:</small>
           <div class="tamanhos">
@@ -148,45 +132,25 @@ function renderizar(listaFiltrada){
 }
 
 // =====================================
-// ⚡ LÓGICA DE SELEÇÃO DINÂMICA
+// ⚡ LÓGICA DE SELEÇÃO (CARD & MODAL)
 // =====================================
-function selecionarCor(id, el, cor) {
-    // --- NOVO: LÓGICA DE RESET GLOBAL ---
-    
-    // 1. Limpa o estado global (deixa apenas o produto atual selecionado)
-    selecionado = {}; 
-    
-    // 2. Remove a classe 'ativo' de TODOS os botões de cor e tamanho do catálogo inteiro
-    document.querySelectorAll(".tag-tamanho").forEach(t => t.classList.remove("ativo"));
 
-    // 3. Reseta o texto de tamanhos de todos os outros cards que não são este
-    document.querySelectorAll(".tamanhos[id^='tamanhos-opcoes-']").forEach(container => {
-        if (container.id !== `tamanhos-opcoes-${id}`) {
-            container.innerHTML = '<span class="placeholder-tamanho">Escolha uma cor...</span>';
-        }
+// Seleção no CARD (Desktop)
+function selecionarCor(id, el, cor) {
+    selecionado = {}; // Reset global
+    document.querySelectorAll(".tag-tamanho").forEach(t => t.classList.remove("ativo"));
+    document.querySelectorAll(".tamanhos[id^='tamanhos-opcoes-']").forEach(c => {
+        if (c.id !== `tamanhos-opcoes-${id}`) c.innerHTML = '<span class="placeholder-tamanho">Escolha uma cor...</span>';
     });
 
-    // --- FIM DO RESET ---
-
-    // 4. UI: Ativa o botão da cor selecionada (neste card específico)
     el.classList.add("ativo");
-
-    // 5. Estado: Salva a cor e o ID do produto atual
     selecionado[id] = { cor: cor };
 
-    // 6. Filtro: Busca variantes desta cor com estoque
-    const produto = produtos.find(p => p.id === id);
-    const tamanhosFiltrados = produto.variantes.filter(v => 
-        v.cor.toLowerCase() === cor.toLowerCase() && v.estoque > 0
-    ).sort((a, b) => a.tamanho - b.tamanho);
+    const p = produtos.find(prod => prod.id === id);
+    const tams = p.variantes.filter(v => v.cor.toLowerCase() === cor.toLowerCase() && v.estoque > 0).sort((a,b)=>a.tamanho - b.tamanho);
 
-    // 7. DOM: Atualiza os botões de tamanho deste card
-    const containerTamanhos = document.getElementById(`tamanhos-opcoes-${id}`);
-    containerTamanhos.innerHTML = tamanhosFiltrados.map(v => `
-        <span class="tag-tamanho" onclick="selecionarTamanho('${id}', this, '${v.tamanho}')">
-            ${v.tamanho}
-        </span>
-    `).join("");
+    const container = document.getElementById(`tamanhos-opcoes-${id}`);
+    container.innerHTML = tams.map(v => `<span class="tag-tamanho" onclick="selecionarTamanho('${id}', this, '${v.tamanho}')">${v.tamanho}</span>`).join("");
 }
 
 function selecionarTamanho(id, el, tam){ 
@@ -195,32 +159,60 @@ function selecionarTamanho(id, el, tam){
   selecionado[id].tamanho = tam; 
 }
 
+// Seleção DENTRO do Modal
+function selecionarCorModal(id, el, cor) {
+    el.parentElement.querySelectorAll(".tag-tamanho").forEach(t => t.classList.remove("ativo"));
+    el.classList.add("ativo");
+    
+    selecionado[id] = { cor: cor };
+
+    const p = produtos.find(prod => prod.id === id);
+    const tams = p.variantes.filter(v => v.cor.toLowerCase() === cor.toLowerCase() && v.estoque > 0).sort((a,b)=>a.tamanho - b.tamanho);
+
+    const container = document.getElementById("modalTamanhos");
+    container.innerHTML = tams.map(v => `<span class="tag-tamanho" onclick="selecionarTamanhoModal('${id}', this, '${v.tamanho}')">${v.tamanho}</span>`).join("");
+}
+
+function selecionarTamanhoModal(id, el, tam) {
+    el.parentElement.querySelectorAll(".tag-tamanho").forEach(x => x.classList.remove("ativo"));
+    el.classList.add("ativo");
+    selecionado[id].tamanho = tam;
+}
+
 // =====================================
 // 🖼️ MODAL E WHATSAPP
 // =====================================
 function abrirModal(idProduto){
-  const produto = produtos.find(p => p.id === idProduto);
-  if(!produto) return;
+  const p = produtos.find(prod => prod.id === idProduto);
+  if(!p) return;
 
+  selecionado = {}; // Reset ao abrir
   const modal = document.getElementById("modalProduto");
+  
+  document.getElementById("modalNome").innerText = p.nome;
+  document.getElementById("modalPreco").innerText = "R$ " + p.preco.toFixed(2).replace(".",",");
+
+  // Imagens
   const imgPrincipal = document.getElementById("modalImagemPrincipal");
   const miniaturas = document.getElementById("modalMiniaturas");
-
-  document.getElementById("modalNome").innerText = produto.nome;
-  document.getElementById("modalPreco").innerText = "R$ " + produto.preco.toFixed(2).replace(".",",");
-
-  let imagens = [];
-  if(produto.imagem) imagens.push(produto.imagem);
-
-  if(produto.imagens_extra){
-    const extras = produto.imagens_extra.replace(/^"|"$/g, "").split("|").map(i=>i.trim()).filter(i=>i);
+  let imagens = [p.imagem];
+  if(p.imagens_extra){
+    const extras = p.imagens_extra.replace(/^"|"$/g, "").split("|").map(i=>i.trim()).filter(i=>i);
     extras.forEach(img => imagens.push(formatarLinkAppSheet(img)));
   }
-
   imgPrincipal.src = imagens[0];
-  miniaturas.innerHTML = imagens.map(img => `
-    <img src="${img}" onclick="trocarImagem('${img}')" class="mini">
-  `).join("");
+  miniaturas.innerHTML = imagens.map(img => `<img src="${img}" onclick="trocarImagem('${img}')" class="mini-modal">`).join("");
+
+  // Cores no Modal
+  const containerCores = document.getElementById("modalCores");
+  const coresU = [...new Set(p.variantes.filter(v=>v.estoque > 0).map(v=>v.cor))];
+  containerCores.innerHTML = coresU.map(c => `<span class="tag-tamanho" onclick="selecionarCorModal('${p.id}', this, '${c}')">${capitalizar(c)}</span>`).join("");
+
+  // Reset Tamanhos no Modal
+  document.getElementById("modalTamanhos").innerHTML = '<span class="text-gray-400 text-sm italic">Selecione uma cor primeiro...</span>';
+
+  // Botão Whats no Modal
+  document.getElementById("btnComprarModal").onclick = () => enviarWhats(p.id);
 
   modal.classList.replace("hidden", "flex");
 }
