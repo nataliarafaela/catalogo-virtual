@@ -21,7 +21,7 @@ const minhaTabela = "Produtos";
 function formatarLinkAppSheet(path) {
   if (!path) return null;
   path = path.trim().replace(/^"|"$/g, "").trim();
-  if (!path) return null;
+  if (!path || path === "" || path === "null") return null;
   if (path.startsWith('data:image') || path.startsWith('http')) return path;
   return `https://www.appsheet.com/template/gettablefileurl?appName=${encodeURIComponent(meuAppName)}&tableName=${encodeURIComponent(minhaTabela)}&fileName=${encodeURIComponent(path)}`;
 }
@@ -34,7 +34,6 @@ function parseProduto(linha){
   const col = linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
   if(!col || col.length < 5) return null;
   
-  // Tratamento de preço para aceitar vírgula ou ponto
   let precoLimpo = (col[3]||"").replace(/^"|"$/g,"").trim().replace(",", ".");
 
   return {
@@ -43,8 +42,13 @@ function parseProduto(linha){
     categoria: (col[2]||"").replace(/^"|"$/g,"").trim(),
     preco: parseFloat(precoLimpo) || 0,
     imagem: formatarLinkAppSheet(col[4]),
-    // Mantemos o campo original para processar no modal
-    imagens_extra: (col[5]||"").trim()
+    // Coleta as 4 colunas de imagens extras diretamente da planilha (F, G, H, I)
+    fotosExtrasBrutas: [
+      (col[5]||""), 
+      (col[6]||""), 
+      (col[7]||""), 
+      (col[8]||"")
+    ]
   };
 }
 
@@ -194,43 +198,36 @@ function abrirModal(idProduto){
   document.getElementById("modalNome").innerText = p.nome;
   document.getElementById("modalPreco").innerText = "R$ " + p.preco.toFixed(2).replace(".",",");
 
-  // --- LÓGICA DE MÚLTIPLAS IMAGENS ---
   const imgPrincipal = document.getElementById("modalImagemPrincipal");
   const miniaturas = document.getElementById("modalMiniaturas");
   
-  // Lista começa com a imagem principal
   let imagens = [p.imagem];
 
-  // Verifica e adiciona as imagens extras (separadas por |)
-  if(p.imagens_extra){
-    const extras = p.imagens_extra
-      .replace(/^"|"$/g, "") // Remove aspas do CSV
-      .split("|")            // Divide pelo separador pipe
-      .map(i => i.trim())    // Limpa espaços
-      .filter(i => i !== ""); // Remove itens vazios
+  // Processa cada coluna de foto extra individualmente
+  p.fotosExtrasBrutas.forEach(caminho => {
+    if(caminho && caminho.trim() !== "" && caminho !== '""'){
+      // Caso a célula contenha múltiplos caminhos (separados por | ou ,)
+      const partes = caminho.replace(/^"|"$/g, "").split(/[|,]/);
+      partes.forEach(parte => {
+        const link = formatarLinkAppSheet(parte);
+        if(link) imagens.push(link);
+      });
+    }
+  });
 
-    extras.forEach(img => {
-      const linkFormatado = formatarLinkAppSheet(img);
-      if(linkFormatado) imagens.push(linkFormatado);
-    });
-  }
+  // Remove duplicados (caso a mesma foto esteja em duas colunas)
+  imagens = [...new Set(imagens)];
 
   imgPrincipal.src = imagens[0];
-  
-  // Gera miniaturas para todas as imagens encontradas
   miniaturas.innerHTML = imagens.map(img => 
     `<img src="${img}" onclick="trocarImagem('${img}')" class="mini-modal">`
   ).join("");
 
-  // Cores no Modal
   const containerCores = document.getElementById("modalCores");
   const coresU = [...new Set(p.variantes.filter(v=>v.estoque > 0).map(v=>v.cor))];
   containerCores.innerHTML = coresU.map(c => `<span class="tag-tamanho" onclick="selecionarCorModal('${p.id}', this, '${c}')">${capitalizar(c)}</span>`).join("");
 
-  // Reset Tamanhos no Modal
   document.getElementById("modalTamanhos").innerHTML = '<span class="text-gray-400 text-sm italic">Selecione uma cor primeiro...</span>';
-
-  // Botão Whats no Modal
   document.getElementById("btnComprarModal").onclick = () => enviarWhats(p.id);
 
   modal.classList.replace("hidden", "flex");
