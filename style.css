@@ -223,6 +223,9 @@ h1, .titulo-catalogo {
 /* ================= RESPONSIVIDADE (CELULAR) ================= */
 @media (max-width: 767px) {
     /* Esconde seleções complexas no card para não poluir */
+    #modalProduto .bg-white {
+        margin-top: 20px; /* Dá uma folga para o botão de fechar não sumir na borda da tela */
+    }
     .card .secao-selecao, 
     .card .botao-whats {
         display: none !important;
