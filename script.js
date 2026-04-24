@@ -33,12 +33,13 @@ function parseProduto(linha){
   if(!linha) return null;
   const col = linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
   if(!col || col.length < 5) return null;
+  let precoLimpo = (col[3]||"").replace(/^"|"$/g,"").trim().replace(",", ".");
 
   return {
     id: (col[0]||"").trim().replace(/^"|"$/g,""),
     nome: (col[1]||"").replace(/^"|"$/g,"").trim(),
     categoria: (col[2]||"").replace(/^"|"$/g,"").trim(),
-    preco: parseFloat((col[3]||"").replace(",", ".")) || 0,
+    preco: parseFloat(precoLimpo) || 0,
     imagem: formatarLinkAppSheet(col[4]),
     imagens_extra: (col[5]||"").trim()
   };
