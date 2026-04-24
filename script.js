@@ -33,6 +33,8 @@ function parseProduto(linha){
   if(!linha) return null;
   const col = linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
   if(!col || col.length < 5) return null;
+  
+  // Tratamento de preço para aceitar vírgula ou ponto
   let precoLimpo = (col[3]||"").replace(/^"|"$/g,"").trim().replace(",", ".");
 
   return {
@@ -41,6 +43,7 @@ function parseProduto(linha){
     categoria: (col[2]||"").replace(/^"|"$/g,"").trim(),
     preco: parseFloat(precoLimpo) || 0,
     imagem: formatarLinkAppSheet(col[4]),
+    // Mantemos o campo original para processar no modal
     imagens_extra: (col[5]||"").trim()
   };
 }
@@ -136,9 +139,8 @@ function renderizar(listaFiltrada){
 // ⚡ LÓGICA DE SELEÇÃO (CARD & MODAL)
 // =====================================
 
-// Seleção no CARD (Desktop)
 function selecionarCor(id, el, cor) {
-    selecionado = {}; // Reset global
+    selecionado = {}; 
     document.querySelectorAll(".tag-tamanho").forEach(t => t.classList.remove("ativo"));
     document.querySelectorAll(".tamanhos[id^='tamanhos-opcoes-']").forEach(c => {
         if (c.id !== `tamanhos-opcoes-${id}`) c.innerHTML = '<span class="placeholder-tamanho">Escolha uma cor...</span>';
@@ -160,7 +162,6 @@ function selecionarTamanho(id, el, tam){
   selecionado[id].tamanho = tam; 
 }
 
-// Seleção DENTRO do Modal
 function selecionarCorModal(id, el, cor) {
     el.parentElement.querySelectorAll(".tag-tamanho").forEach(t => t.classList.remove("ativo"));
     el.classList.add("ativo");
@@ -187,22 +188,39 @@ function abrirModal(idProduto){
   const p = produtos.find(prod => prod.id === idProduto);
   if(!p) return;
 
-  selecionado = {}; // Reset ao abrir
+  selecionado = {}; 
   const modal = document.getElementById("modalProduto");
   
   document.getElementById("modalNome").innerText = p.nome;
   document.getElementById("modalPreco").innerText = "R$ " + p.preco.toFixed(2).replace(".",",");
 
-  // Imagens
+  // --- LÓGICA DE MÚLTIPLAS IMAGENS ---
   const imgPrincipal = document.getElementById("modalImagemPrincipal");
   const miniaturas = document.getElementById("modalMiniaturas");
+  
+  // Lista começa com a imagem principal
   let imagens = [p.imagem];
+
+  // Verifica e adiciona as imagens extras (separadas por |)
   if(p.imagens_extra){
-    const extras = p.imagens_extra.replace(/^"|"$/g, "").split("|").map(i=>i.trim()).filter(i=>i);
-    extras.forEach(img => imagens.push(formatarLinkAppSheet(img)));
+    const extras = p.imagens_extra
+      .replace(/^"|"$/g, "") // Remove aspas do CSV
+      .split("|")            // Divide pelo separador pipe
+      .map(i => i.trim())    // Limpa espaços
+      .filter(i => i !== ""); // Remove itens vazios
+
+    extras.forEach(img => {
+      const linkFormatado = formatarLinkAppSheet(img);
+      if(linkFormatado) imagens.push(linkFormatado);
+    });
   }
+
   imgPrincipal.src = imagens[0];
-  miniaturas.innerHTML = imagens.map(img => `<img src="${img}" onclick="trocarImagem('${img}')" class="mini-modal">`).join("");
+  
+  // Gera miniaturas para todas as imagens encontradas
+  miniaturas.innerHTML = imagens.map(img => 
+    `<img src="${img}" onclick="trocarImagem('${img}')" class="mini-modal">`
+  ).join("");
 
   // Cores no Modal
   const containerCores = document.getElementById("modalCores");
