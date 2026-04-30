@@ -246,7 +246,7 @@ function enviarWhats(id){
   }
   
   const msg = `Olá! Vi no catálogo e gostaria de comprar:\n\n*Produto:* ${p.nome}\n*Cor:* ${capitalizar(sel.cor)}\n*Tamanho:* ${sel.tamanho}\n*Preço:* R$ ${p.preco.toFixed(2).replace(".",",")}`;
-  window.open(`https://wa.me/558189928688?text=${encodeURIComponent(msg)}`);
+  window.open(`https://wa.me/5581982695256?text=${encodeURIComponent(msg)}`);
 }
 
 function capitalizar(t){ return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : ""; }
